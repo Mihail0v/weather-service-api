@@ -1,0 +1,163 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Weather Service API",
+        "description": "Weather service",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080",
+            "description": "Local development"
+        }
+    ],
+    "paths": {
+        "/api/v1/health": {
+            "get": {
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Health check endpoint",
+                "description": "Returns the health status of the service",
+                "operationId": "get_health_check",
+                "responses": {
+                    "200": {
+                        "description": "Service is healthy",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "healthy"
+                                        },
+                                        "timestamp": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2025-11-10 15:26:14"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/weather/{city}": {
+            "get": {
+                "tags": [
+                    "Weather"
+                ],
+                "summary": "Get current weather for a city",
+                "description": "Returns current weather data",
+                "operationId": "get_weather_get",
+                "parameters": [
+                    {
+                        "name": "city",
+                        "in": "path",
+                        "description": "City name (e.g., Sofia, London, Paris)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 100,
+                            "minLength": 2
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Weather data retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WeatherData"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to fetch weather data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Failed to fetch weather data"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "External API error"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "WeatherData": {
+                "description": "Weather data",
+                "required": [
+                    "city",
+                    "temperature",
+                    "trend",
+                    "formatted_temperature",
+                    "recorded_at"
+                ],
+                "properties": {
+                    "city": {
+                        "description": "City name",
+                        "type": "string",
+                        "example": "Sofia"
+                    },
+                    "temperature": {
+                        "description": "Temperature value",
+                        "type": "number",
+                        "format": "float",
+                        "example": 4.5
+                    },
+                    "trend": {
+                        "description": "Temperature trend",
+                        "type": "string",
+                        "enum": [
+                            "hot",
+                            "cold",
+                            "static"
+                        ],
+                        "example": "static"
+                    },
+                    "formatted_temperature": {
+                        "description": "Temperature formatted",
+                        "type": "string",
+                        "example": "4.5 -"
+                    },
+                    "recorded_at": {
+                        "description": "timestamp",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-11-10 15:26:14"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Weather",
+            "description": "Weather data operations"
+        },
+        {
+            "name": "Health",
+            "description": "Health check endpoints"
+        }
+    ]
+}

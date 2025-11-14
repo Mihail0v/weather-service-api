@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: weather-service-php
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    environment:
+      - APP_ENV=${APP_ENV:-dev}
+      - DATABASE_URL=postgresql://weather_user:weather_pass@postgres:5432/weather_db?serverVersion=16&charset=utf8
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - weather-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: weather-service-nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+    networks:
+      - weather-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: weather-service-postgres
+    environment:
+      POSTGRES_DB: weather_db
+      POSTGRES_USER: weather_user
+      POSTGRES_PASSWORD: weather_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - weather-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: weather-service-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - weather-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  weather-network:
+    driver: bridge

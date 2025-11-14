@@ -1,0 +1,20 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: Weather Service API
+            description: Weather service
+            version: 1.0.0
+        servers:
+            - url: http://localhost:8080
+              description: Local development
+        tags:
+            - name: Weather
+              description: Weather data operations
+            - name: Health
+              description: Health check endpoints
+    models:
+        names:
+            - { alias: WeatherData, type: App\DTO\WeatherData }
+    areas:
+        path_patterns:
+            - ^/api/v1(?!/doc$)

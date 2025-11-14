@@ -1,0 +1,50 @@
+parameters:
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/DTO/'
+            - '../src/Kernel.php'
+
+    # Interface bindings for easy package swapping (SOLID: Dependency Inversion)
+    App\Repository\WeatherRepositoryInterface:
+        alias: App\Repository\DoctrineWeatherRepository
+
+    App\Cache\CacheInterface:
+        alias: App\Cache\RedisCache
+
+    # Redis client configuration
+    Predis\Client:
+        arguments:
+            - '%env(REDIS_URL)%'
+
+    Predis\ClientInterface:
+        alias: Predis\Client
+
+    # Concrete implementations
+    App\Cache\RedisCache:
+        arguments:
+            - '@Predis\ClientInterface'
+            - '@logger'
+
+    App\Repository\DoctrineWeatherRepository:
+        arguments:
+            - '@doctrine.orm.entity_manager'
+
+    App\Service\WeatherApiClient:
+        arguments:
+            - '@logger'
+
+    App\Service\WeatherService:
+        arguments:
+            - '@App\Repository\WeatherRepositoryInterface'
+            - '@App\Cache\CacheInterface'
+            - '@App\Service\WeatherApiClient'
+            - '@logger'
